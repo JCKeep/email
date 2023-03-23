@@ -154,17 +154,17 @@ pub enum ContentType {
 
 * 本地用户之间发送邮件
 
-![](./assets/1.png)
+![.](./assets/1.png)
 
 * 向qq邮箱发送邮件
 
-![](./assets/2.png)
+![.](./assets/2.png)
 
-![](./assets/3.png)
+![.](./assets/3.png)
 
 * 发送附件
 
-![](./assets/4.png)
+![.](./assets/4.png)
 
-![](./assets/5.png)
+![.](./assets/5.png)
 
