@@ -63,7 +63,6 @@ impl ContentType {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/octet-stream",
-        // "multipart/related; type=\"multipart/alternative\"",
     ];
 }
 
@@ -88,10 +87,16 @@ pub fn parse_content_type(s: &str) -> ContentType {
         ContentType::ApplicationPPTX
     } else if s.ends_with(".xls") {
         ContentType::ApplicationEXCEL
-    } else if s.ends_with(".exe") {
-        ContentType::ApplicationOctetStream
-    } else {
+    } else if s.ends_with(".c")
+        || s.ends_with(".rs")
+        || s.ends_with(".cpp")
+        || s.ends_with(".h")
+        || s.ends_with(".txt")
+        || s.ends_with(".toml")
+    {
         ContentType::TextPlain
+    } else {
+        ContentType::ApplicationOctetStream
     }
 }
 
@@ -128,9 +133,7 @@ pub async fn mime_encode(
 
     let multipart = match content_type {
         ContentType::MultipartMixed | ContentType::MultipartAlternative => {
-            for b in
-                format!("Content-Type: {}; boundary=\"0123456789\"\r\n", ct).as_bytes()
-            {
+            for b in format!("Content-Type: {}; boundary=\"0123456789\"\r\n", ct).as_bytes() {
                 encoded.put_u8(*b);
             }
 
@@ -234,6 +237,4 @@ pub async fn mime_encode(
     Ok(encoded)
 }
 
-pub async fn mime_decode(content: &str) {
-    
-}
+pub async fn mime_decode(content: &str) {}

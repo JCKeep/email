@@ -98,7 +98,7 @@ async fn send() -> Result<(), ()> {
         filename: None,
         content,
         content_type: ContentType::TextHtml,
-        encoding: ContentTransferEncoding::Bit7,
+        encoding: ContentTransferEncoding::Base64,
     });
 
     print!("Attachment yes/no? ");
@@ -127,24 +127,25 @@ async fn send() -> Result<(), ()> {
 
     println!("sending mail...");
     std::io::stdout().flush();
-    match smtp.send(
-        from.trim(),
-        to.trim(),
-        subject.trim(),
-        ContentTransferEncoding::Bit7,
-        content_type,
-        "",
-        Some(&attachment),
-    )
-    .await {
+    match smtp
+        .send(
+            from.trim(),
+            to.trim(),
+            subject.trim(),
+            encoding,
+            content_type,
+            "",
+            Some(&attachment),
+        )
+        .await
+    {
         Ok(_) => {
             println!("success");
-        },
+        }
         Err(_) => {
             println!("file not exist");
-        },
-    }
-    ;
+        }
+    };
 
     Ok(())
 }
@@ -194,7 +195,7 @@ async fn recv() -> Result<(), ()> {
     }
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), ()> {
     let args: Vec<String> = env::args().collect();
     let rc = parse_args(args)?;
