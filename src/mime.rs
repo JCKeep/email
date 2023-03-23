@@ -43,7 +43,8 @@ pub enum CharSet {
 }
 
 impl ContentTransferEncoding {
-    pub const VALUE_MAP: [&'static str; 3] = ["base64", "7bit", "quoted-printable"];
+    pub const VALUE_MAP: [&'static str; 3] =
+        ["base64", "7bit", "quoted-printable"];
 }
 
 impl ContentType {
@@ -119,7 +120,8 @@ pub async fn mime_encode(
 ) -> Result<Vec<u8>, ()> {
     let mut encoded = Vec::new();
 
-    let ec = ContentTransferEncoding::VALUE_MAP[content_transfer_encoding as usize];
+    let ec =
+        ContentTransferEncoding::VALUE_MAP[content_transfer_encoding as usize];
     let ct = ContentType::VALUE_MAP[content_type as usize];
 
     for b in format!(
@@ -133,14 +135,19 @@ pub async fn mime_encode(
 
     let multipart = match content_type {
         ContentType::MultipartMixed | ContentType::MultipartAlternative => {
-            for b in format!("Content-Type: {}; boundary=\"0123456789\"\r\n", ct).as_bytes() {
+            for b in
+                format!("Content-Type: {}; boundary=\"0123456789\"\r\n", ct)
+                    .as_bytes()
+            {
                 encoded.put_u8(*b);
             }
 
             true
         }
         _ => {
-            for b in format!("Content-Type: {}; charset=\"utf-8\"\r\n", ct).as_bytes() {
+            for b in format!("Content-Type: {}; charset=\"utf-8\"\r\n", ct)
+                .as_bytes()
+            {
                 encoded.put_u8(*b);
             }
 
@@ -183,19 +190,21 @@ pub async fn mime_encode(
                             encoded.put_u8(*b);
                         }
                     }
-                    ContentTransferEncoding::Bit7 => {
-                        match encoding::all::ASCII.encode(&elts.content, EncoderTrap::Strict) {
-                            Ok(mut v) => {
-                                encoded.append(&mut v);
-                            }
-                            Err(e) => {
-                                eprintln!("{}", e);
-                                return Err(());
-                            }
+                    ContentTransferEncoding::Bit7 => match encoding::all::ASCII
+                        .encode(&elts.content, EncoderTrap::Strict)
+                    {
+                        Ok(mut v) => {
+                            encoded.append(&mut v);
                         }
-                    }
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            return Err(());
+                        }
+                    },
                     ContentTransferEncoding::QuotedPrintable => {
-                        encoded.append(&mut quoted_printable::encode(&elts.content));
+                        encoded.append(&mut quoted_printable::encode(
+                            &elts.content,
+                        ));
                     }
                 }
             }
@@ -206,7 +215,9 @@ pub async fn mime_encode(
     } else {
         match content_transfer_encoding {
             ContentTransferEncoding::Base64 => {
-                for b in format!("Content-Transfer-Encoding: {}\r\n\r\n", ec).as_bytes() {
+                for b in format!("Content-Transfer-Encoding: {}\r\n\r\n", ec)
+                    .as_bytes()
+                {
                     encoded.put_u8(*b);
                 }
                 for b in encode(content).as_bytes() {
@@ -214,10 +225,13 @@ pub async fn mime_encode(
                 }
             }
             ContentTransferEncoding::Bit7 => {
-                for b in format!("Content-Transfer-Encoding: {}\r\n\r\n", ec).as_bytes() {
+                for b in format!("Content-Transfer-Encoding: {}\r\n\r\n", ec)
+                    .as_bytes()
+                {
                     encoded.put_u8(*b);
                 }
-                match encoding::all::ASCII.encode(content, EncoderTrap::Strict) {
+                match encoding::all::ASCII.encode(content, EncoderTrap::Strict)
+                {
                     Ok(mut v) => encoded.append(&mut v),
                     Err(e) => {
                         eprintln!("{}", e);
@@ -226,7 +240,9 @@ pub async fn mime_encode(
                 }
             }
             ContentTransferEncoding::QuotedPrintable => {
-                for b in format!("Content-Transfer-Encoding: {}\r\n\r\n", ec).as_bytes() {
+                for b in format!("Content-Transfer-Encoding: {}\r\n\r\n", ec)
+                    .as_bytes()
+                {
                     encoded.put_u8(*b);
                 }
                 encoded.append(&mut quoted_printable::encode(content));

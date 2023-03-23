@@ -126,7 +126,9 @@ impl Pop3Builder {
     }
 }
 
-async fn pop3_upstream_connect(pop: &mut Pop3Client) -> Result<TcpStream, &'static str> {
+async fn pop3_upstream_connect(
+    pop: &mut Pop3Client,
+) -> Result<TcpStream, &'static str> {
     for _ in 0..5 {
         match timeout(Duration::from_millis(500), async {
             TcpStream::connect(pop.host.as_ref().unwrap())
@@ -141,17 +143,23 @@ async fn pop3_upstream_connect(pop: &mut Pop3Client) -> Result<TcpStream, &'stat
                 if !buf.starts_with(b"+OK") {
                     return Err("connection refused");
                 }
-                c.write(format!("USER {}\r\n", pop.email.as_ref().unwrap()).as_bytes())
-                    .await
-                    .unwrap();
+                c.write(
+                    format!("USER {}\r\n", pop.email.as_ref().unwrap())
+                        .as_bytes(),
+                )
+                .await
+                .unwrap();
                 c.read(buf).await.unwrap();
                 if !buf.starts_with(b"+OK") {
                     return Err("email error");
                 }
                 if pop.password.is_some() {
-                    c.write(format!("PASS {}\r\n", pop.password.as_ref().unwrap()).as_bytes())
-                        .await
-                        .unwrap();
+                    c.write(
+                        format!("PASS {}\r\n", pop.password.as_ref().unwrap())
+                            .as_bytes(),
+                    )
+                    .await
+                    .unwrap();
                     c.read(buf).await.unwrap();
                     if !buf.starts_with(b"+OK") {
                         return Err("password error");
@@ -168,7 +176,10 @@ async fn pop3_upstream_connect(pop: &mut Pop3Client) -> Result<TcpStream, &'stat
     Err("5 times timeout")
 }
 
-async fn pop3_upstream_poll(pop: &mut Pop3Client, cmd: Pop3Command) -> Result<String, ()> {
+async fn pop3_upstream_poll(
+    pop: &mut Pop3Client,
+    cmd: Pop3Command,
+) -> Result<String, ()> {
     let mut buf = vec![0; 1024];
     let mut c = pop.upstream.as_mut().unwrap();
     c.write(b"NOOP\r\n").await.unwrap();
@@ -243,7 +254,10 @@ async fn pop3_upstream_poll(pop: &mut Pop3Client, cmd: Pop3Command) -> Result<St
     pop3_upstream_read_content(pop, cmd).await
 }
 
-async fn pop3_upstream_read_content(pop: &mut Pop3Client, cmd: Pop3Command) -> Result<String, ()> {
+async fn pop3_upstream_read_content(
+    pop: &mut Pop3Client,
+    cmd: Pop3Command,
+) -> Result<String, ()> {
     let connect = pop.upstream.as_mut().unwrap();
     let buf = &mut pop.buf;
     let mut st = String::new();
@@ -311,7 +325,8 @@ pub async fn pop3_handler_state(
             let mut index = 0;
             let mut tmp_buf = String::new();
             for mail in &state.mails {
-                tmp_buf.push_str(format!("{} {}\r\n", index, mail.len()).as_str());
+                tmp_buf
+                    .push_str(format!("{} {}\r\n", index, mail.len()).as_str());
                 index += 1;
             }
             tmp_buf.push_str(".\r\n");
@@ -358,11 +373,15 @@ pub async fn pop3_handler_state(
         }
         Pop3Command::USER(u) => {
             state.user = Some(u);
-            state.file =
-                match File::open(format!("/var/mail/{}", state.user.as_ref().unwrap())).await {
-                    Ok(f) => Some(f),
-                    Err(_) => return Err(()),
-                };
+            state.file = match File::open(format!(
+                "/var/mail/{}",
+                state.user.as_ref().unwrap()
+            ))
+            .await
+            {
+                Ok(f) => Some(f),
+                Err(_) => return Err(()),
+            };
             state
                 .file
                 .as_mut()
@@ -470,7 +489,9 @@ fn pop3_parse_command(buf: &[u8], n: usize) -> Result<Pop3Command, ()> {
         let mut s = Vec::new();
         for i in 5..n {
             let tmp = buf[i];
-            if (tmp > 'a' as u8 && tmp < 'z' as u8) || (tmp > 'A' as u8 && tmp < 'Z' as u8) {
+            if (tmp > 'a' as u8 && tmp < 'z' as u8)
+                || (tmp > 'A' as u8 && tmp < 'Z' as u8)
+            {
                 s.put_u8(tmp);
             }
         }

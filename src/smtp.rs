@@ -11,7 +11,9 @@ use tokio::{
     time::timeout,
 };
 
-use crate::mime::{mime_encode, Alternative, ContentTransferEncoding, ContentType};
+use crate::mime::{
+    mime_encode, Alternative, ContentTransferEncoding, ContentType,
+};
 
 #[derive(Debug)]
 pub struct SmtpClient {
@@ -55,7 +57,17 @@ impl SmtpClient {
                 smtp_upstream_connect(self).await.unwrap();
             }
         }
-        smtp_upstream_send(self, from, to, subject, cte, content_type, content, attach).await
+        smtp_upstream_send(
+            self,
+            from,
+            to,
+            subject,
+            cte,
+            content_type,
+            content,
+            attach,
+        )
+        .await
     }
 
     pub async fn quit(mut self) {
@@ -124,7 +136,9 @@ impl SmtpBuilder {
     }
 }
 
-async fn smtp_upstream_connect(smtp: &mut SmtpClient) -> Result<TcpStream, &'static str> {
+async fn smtp_upstream_connect(
+    smtp: &mut SmtpClient,
+) -> Result<TcpStream, &'static str> {
     for _ in 0..5 {
         match timeout(Duration::from_millis(500), async {
             TcpStream::connect(smtp.host.as_ref().unwrap())
@@ -139,9 +153,12 @@ async fn smtp_upstream_connect(smtp: &mut SmtpClient) -> Result<TcpStream, &'sta
                 if !buf.starts_with(b"220") {
                     return Err("connection refused");
                 }
-                c.write(format!("HELO {}\r\n", smtp.address.as_ref().unwrap()).as_bytes())
-                    .await
-                    .unwrap();
+                c.write(
+                    format!("HELO {}\r\n", smtp.address.as_ref().unwrap())
+                        .as_bytes(),
+                )
+                .await
+                .unwrap();
                 loop {
                     match c.read(buf).await {
                         Ok(n) if n == 0 => {
@@ -168,16 +185,22 @@ async fn smtp_upstream_connect(smtp: &mut SmtpClient) -> Result<TcpStream, &'sta
                     if !buf.starts_with(b"334") {
                         return Err("auth login error");
                     }
-                    c.write(format!("{}\r\n", smtp.email.as_ref().unwrap()).as_bytes())
-                        .await
-                        .unwrap();
+                    c.write(
+                        format!("{}\r\n", smtp.email.as_ref().unwrap())
+                            .as_bytes(),
+                    )
+                    .await
+                    .unwrap();
                     c.read(buf).await.unwrap();
                     if !buf.starts_with(b"334") {
                         return Err("auth login error2");
                     }
-                    c.write(format!("{}\r\n", smtp.token.as_ref().unwrap()).as_bytes())
-                        .await
-                        .unwrap();
+                    c.write(
+                        format!("{}\r\n", smtp.token.as_ref().unwrap())
+                            .as_bytes(),
+                    )
+                    .await
+                    .unwrap();
                     c.read(buf).await.unwrap();
                     if !buf.starts_with(b"235") {
                         return Err("authentication failure");

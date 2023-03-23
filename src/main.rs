@@ -2,12 +2,16 @@
 use std::{env, io::Write};
 
 use email::{
-    mime::{parse_content_type, Alternative, ContentTransferEncoding, ContentType},
+    mime::{
+        parse_content_type, Alternative, ContentTransferEncoding, ContentType,
+    },
     pop3::{pop3_handler_state, Pop3Builder, Pop3Command, Pop3UserState},
     smtp::SmtpBuilder,
 };
 use tokio::{
-    io::{self, stdin, AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader},
+    io::{
+        self, stdin, AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader,
+    },
     net::{TcpListener, TcpStream},
 };
 
@@ -29,7 +33,9 @@ pub async fn pop3_handler(mut stream: TcpStream) {
                 break;
             }
             Ok(n) => {
-                if let Err(_) = pop3_handler_state(&mut w, &mut state, &buf, n).await {
+                if let Err(_) =
+                    pop3_handler_state(&mut w, &mut state, &buf, n).await
+                {
                     return;
                 }
             }

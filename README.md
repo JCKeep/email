@@ -118,6 +118,38 @@ quit
 Connection closed by foreign host.
 ```
 
+### MIME
+
+支持多种编码协议及类型
+
+```rust
+#[derive(Debug, Clone, Copy)]
+pub enum ContentTransferEncoding {
+    Base64,
+    Bit7,
+    QuotedPrintable,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum ContentType {
+    TextHtml,
+    TextPlain,
+    MultipartMixed,
+    MultipartAlternative,
+    ImageJpeg,
+    ImageGif,
+    ImagePng,
+    ApplicationPdf,
+    ApplicationZip,
+    ApplicationRar,
+    VideoMp4,
+    ApplicationPPTX,
+    ApplicationWORD,
+    ApplicationEXCEL,
+    ApplicationOctetStream,
+}
+```
+
 ## 邮件服务器演示
 
 * 本地用户之间发送邮件
